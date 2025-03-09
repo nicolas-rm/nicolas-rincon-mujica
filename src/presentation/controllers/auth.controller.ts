@@ -1,13 +1,29 @@
 import { Request, Response } from 'express';
 import authService from '../../application/services/auth.service';
+import { CustomError } from '../../configurations/customErrors';
 
 class AuthController {
+
+    private handleError = (error: unknown, res: Response) => {
+        if (error instanceof CustomError) {
+            return res.status(error.statusCode).json({ error: error.message })
+        }
+
+        console.log(error) // Agregar Winston o similar
+        return res.status(500).json({ error: 'Servidor fuera de servicio' })
+    }
+
     public async login(req: Request, res: Response): Promise<void> {
         try {
             const response = await authService.login(req, res);
             res.status(200).send(response);
         } catch (error) {
-            res.status(500).send({ message: 'Inicio de sesión fallido', error });
+            console.log(error)
+            if (error instanceof CustomError) {
+                throw error;
+            }
+
+            this.handleError(error, res);
         }
     }
 
@@ -16,7 +32,7 @@ class AuthController {
             const response = await authService.register(req, res);
             res.status(200).send(response);
         } catch (error) {
-            res.status(500).send({ message: 'Registro fallido', error });
+            this.handleError(error, res);
         }
     }
 
@@ -24,7 +40,7 @@ class AuthController {
         try {
             res.status(200).send({ message: 'Logout successful' });
         } catch (error) {
-            res.status(500).send({ message: 'Logout failed', error });
+            this.handleError(error, res);
         }
     }
 }

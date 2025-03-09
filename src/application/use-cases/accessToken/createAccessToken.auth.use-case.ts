@@ -38,7 +38,7 @@ export class CreateAccessTokenAuthCase {
             throw CustomError.internalServerError('Token no generado');
         }
 
-        this.handleAccessTokens(user.id, newAccessToken);
+        this.handleAccessTokens(user.id, newAccessToken, res);
 
         if (!newAccessToken) {
             throw CustomError.internalServerError('Token no generado');
@@ -50,7 +50,7 @@ export class CreateAccessTokenAuthCase {
     private async generateToken(user: any, req: Request, res: Response): Promise<string | undefined> {
         try {
             const payload = { sub: user.id, email: user.email };
-            const response = await Jwt.sign(payload);
+            const response = await Jwt.sing(payload);
 
             if (!response) {
                 throw CustomError.internalServerError('Token no generado');
@@ -63,13 +63,13 @@ export class CreateAccessTokenAuthCase {
         }
     }
 
-    private async handleAccessTokens(userId: string, token: string): Promise<void> {
+    private async handleAccessTokens(userId: string, token: string, res: Response): Promise<void> {
         try {
             // const expiresAt = moment().add(1, 'hours').toDate();
             const tokens = await this.accessTokenRepository.findByAuthId(userId);
 
             if (tokens.length >= 5) {
-                await this.deleteOldestToken(tokens);
+                await this.deleteOldestToken(tokens, res);
             }
 
             await this.accessTokenRepository.create({
@@ -78,16 +78,16 @@ export class CreateAccessTokenAuthCase {
                 // expiresAt
             });
         } catch (error) {
-            throw new Error('Crear token de acceso falló');
+            this.handleError(error, res);
         }
     }
 
-    private async deleteOldestToken(tokens: any[]): Promise<void> {
+    private async deleteOldestToken(tokens: any[], res: Response): Promise<void> {
         try {
             const oldestToken = tokens.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
             await this.accessTokenRepository.delete(oldestToken.id);
         } catch (error) {
-            throw new Error('Eliminar token de acceso falló');
+            this.handleError(error, res);
         }
     }
 }

@@ -22,20 +22,26 @@ export class TokenMiddleware {
         const token = autorization.split(' ').at(1) || ''
 
         try {
+            console.log('\n' + '\x1b[33m%s\x1b[0m', `Validando JWT: \x1b[37mIniciando\x1b[0m`);
+            console.log('TokenMiddleware -> validateJwt -> token', token)
 
             const payload = await Jwt.verify<{ id: string }>(token)
 
             // Si el token no es valido
             if (!payload) return res.status(401).json({ error: 'Token no valido' })
 
-            const user = await prisma.auth.findUnique({ where: { id: payload.id } })
+            const accessToken = await prisma.accessToken.findFirst({ where: { id: payload.id }, include: { auth: true } })
 
-            // Si el usuario no existe
-            if (!user) return res.status(401).json({ error: 'Usuario no encontrado' })
+            // Si el token no existe
+            if (!accessToken) return res.status(401).json({ error: 'Token no encontrado' })
+
+
+            // // Si el usuario no existe
+            // if (!user) return res.status(401).json({ error: 'Usuario no encontrado' })
 
 
             // Agregamos el payload al body
-            req.body.user = user
+            req.body.user = accessToken.auth
 
             console.log('\n' + '\x1b[33m%s\x1b[0m', `Validando JWT: \x1b[37mValido\x1b[0m`);
             next()

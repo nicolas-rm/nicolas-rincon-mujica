@@ -45,7 +45,8 @@ export class JoiMiddleware {
                     // Se envía la respuesta sin devolver el resultado, de forma que la función retorne void.
                     res.status(400).json({
                         message: `Errores en ${key}`,
-                        details: error.details.map((detail) => detail.message)
+                        details: error.details.map((detail) => detail.message),
+                        value: error._original
                     });
                     return;
                 }

@@ -3,6 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { envs } from './configurations/envs';
 import AppRoutes from './presentation/routes/app.routes';
+import authRoutes from './presentation/routes/auth.routes';
+import productRoutes from './presentation/routes/product.routes';
 
 export default class Servidor {
 
@@ -41,7 +43,9 @@ export default class Servidor {
 
     private routes(): void {
         // Rutas
-        this.app.use('/', AppRoutes.routes);
+        this.app.use('/api/auth', authRoutes)
+        this.app.use('/api/products', productRoutes)
+        // this.app.use('/', AppRoutes.routes);
     }
 
     // Metodo Principal y Unico Para La Ejecucion, Patron Singleton

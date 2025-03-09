@@ -5,77 +5,69 @@ import Joi from "joi";
 //     height      Float?
 //     length      Float?
 //     width       Float?
+
 export const createProductSchema = Joi.object({
     name: Joi.string()
         .required()
+        .empty([null, ""])
         .label("name")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .messages({ "any.required": "{{#label}} es requerido" }),
+
     description: Joi.string()
         .required()
+        .empty([null, ""])
         .label("description")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .messages({ "any.required": "{{#label}} es requerido" }),
+
     height: Joi.number()
         .optional()
-        .label("height")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("height"),
+
     length: Joi.number()
         .optional()
-        .label("length")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("length"),
+
     width: Joi.number()
         .optional()
-        .label("width")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
-})
+        .empty([null, ""])
+        .label("width"),
+});
 
 export const updateProductSchema = Joi.object({
     id: Joi.string()
         .required()
+        .empty([null, ""])
         .label("id")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .messages({ "any.required": "{{#label}} es requerido" }),
+
     name: Joi.string()
         .optional()
-        .label("name")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("name"),
+
     description: Joi.string()
         .optional()
-        .label("description")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("description"),
+
     height: Joi.number()
         .optional()
-        .label("height")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("height"),
+
     length: Joi.number()
         .optional()
-        .label("length")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
+        .empty([null, ""])
+        .label("length"),
+
     width: Joi.number()
         .optional()
-        .label("width")
-        .messages({
-            "any.required": "{{#label}} es requerido",
-        }),
-})
+        .empty([null, ""])
+        .label("width"),
+});
+
 
 export const getProductSchema = Joi.object({
     id: Joi.string()

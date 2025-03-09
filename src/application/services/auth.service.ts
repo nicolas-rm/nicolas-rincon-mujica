@@ -23,7 +23,7 @@ class AuthService {
         return this.registerUseCase.execute(req, res);
     }
 
-    public async login(req: Request, res: Response): Promise<RefreshTokenInterfaceDto | null> {
+    public async login(req: Request, res: Response): Promise<{ token: string, refreshToken: string } | null> {
         const response = await this.loginUseCase.execute(req, res);
 
         if (response) {
@@ -31,7 +31,7 @@ class AuthService {
             const accessToken = await this.accessTokenUseCase.execute(response.userId, req, res);
 
             const refreshToken = await this.refreshTokenUseCase.execute(response.userId, req, res);
-            return { token: refreshToken.token, refreshToken: refreshToken.refreshToken };
+            return { token: accessToken.token, refreshToken: refreshToken.refreshToken };
         }
         return null;
     }

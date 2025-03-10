@@ -9,15 +9,6 @@ export class RegisterAuthUseCase {
 
     constructor(private readonly authRepository: AuthRepositoryInterface) { }
 
-    private handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message })
-        }
-
-        console.log(error) // Agregar Winston o similar
-        return res.status(500).json({ error: 'Servidor fuera de servicio' })
-    }
-
     public async execute(req: Request, res: Response): Promise<{ userId: string } | undefined> {
         const { email, passwordHash } = req.body;
 
@@ -39,7 +30,7 @@ export class RegisterAuthUseCase {
             return { userId: newUser.id };
 
         } catch (error) {
-            this.handleError(error, res);
+            throw error;
         }
     }
 }

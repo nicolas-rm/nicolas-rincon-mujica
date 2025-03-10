@@ -27,6 +27,10 @@ class ProductService {
     }
 
     public async delete(req: Request, res: Response): Promise<{ id: string } | undefined> {
+
+        console.log(req.params.id);
+        console.log(req.body);
+
         return this.deleteProductUseCase.execute(req, res);
     }
 

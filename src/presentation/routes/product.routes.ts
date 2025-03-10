@@ -17,7 +17,7 @@ class ProductRouter {
         // Creamos una instancia del middleware de validación pasándole el esquema para el body
         const JoinCreateProduct = new JoiMiddleware({ body: createProductSchema });
         const JoinUpdateProduct = new JoiMiddleware({ body: updateProductSchema });
-        const JoinDeleteProduct = new JoiMiddleware({ body: deleteProductSchema });
+        const JoinDeleteProduct = new JoiMiddleware({ params: deleteProductSchema });
         const JoinGetProduct = new JoiMiddleware({ params: getProductSchema });
         const JoinGetAllProduct = new JoiMiddleware({ query: getAllProductSchema });
         const JoinGetAllProductQuery = new JoiMiddleware({ query: getAllProductSchemaQuery });

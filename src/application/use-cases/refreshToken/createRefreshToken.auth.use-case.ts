@@ -1,6 +1,6 @@
+import { Jwt } from './../../../configurations/jwt';
 // import prisma from "../../../infrastructure/database/prisma.service";
 import { RefreshTokenInterfaceDto } from "../../dtos/refresToken.interface.dto";
-import { Jwt } from "../../../configurations/jwt";
 import { randomBytes } from "crypto";
 import moment from 'moment';
 import { Request, Response } from 'express';
@@ -12,42 +12,37 @@ export class CreateRefreshTokenAuthCase {
 
     constructor(private readonly authRepository: AuthRepositoryInterface, private readonly refreshTokenRepository: RefreshTokenRepositoryInterface) { }
 
-    private handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message })
-        }
-
-        console.log(error) // Agregar Winston o similar
-        return res.status(500).json({ error: 'Servidor fuera de servicio' })
-    }
-
     public async execute(userId: string, req: Request, res: Response): Promise<RefreshTokenInterfaceDto> {
 
-        // Buscar usuario en la base de datos
-        const user = await this.authRepository.findById(userId);
+        try {
+            // Buscar usuario en la base de datos
+            const user = await this.authRepository.findById(userId);
 
-        // Si el usuario no existe
-        if (!user) {
-            throw CustomError.badRequest('Usuario no encontrado');
+            // Si el usuario no existe
+            if (!user) {
+                throw CustomError.badRequest('Usuario no encontrado');
+            }
+
+            // Generar token
+            const newAccessToken = await this.generateToken(user, req, res);
+            const newRefreshTokenValue = randomBytes(64).toString('hex');
+
+            this.handleRefreshTokens(user.id, newRefreshTokenValue);
+
+            if (!newAccessToken) {
+                throw CustomError.internalServerError('Token no generado');
+            }
+
+            return { refreshToken: newRefreshTokenValue };
+        } catch (error) {
+            throw error;
         }
-
-        // Generar token
-        const newAccessToken = await this.generateToken(user, req, res);
-        const newRefreshTokenValue = randomBytes(64).toString('hex');
-
-        this.handleRefreshTokens(user.id, newRefreshTokenValue);
-
-        if (!newAccessToken) {
-            throw CustomError.internalServerError('Token no generado');
-        }
-
-        return { token: newAccessToken, refreshToken: newRefreshTokenValue };
     }
 
     private async generateToken(user: any, req: Request, res: Response): Promise<string | undefined> {
         try {
             const payload = { sub: user.id, email: user.email };
-            const response = await Jwt.sign(payload);
+            const response = await Jwt.sing(payload);
 
             if (!response) {
                 throw CustomError.internalServerError('Token no generado');
@@ -56,7 +51,7 @@ export class CreateRefreshTokenAuthCase {
             return response;
 
         } catch (error) {
-            this.handleError(error, res);
+            throw error;
         }
     }
 

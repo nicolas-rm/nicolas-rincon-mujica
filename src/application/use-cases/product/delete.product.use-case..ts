@@ -6,15 +6,6 @@ export class DeleteProductUseCase {
 
     constructor(private readonly productRepository: ProductRepositoryInterface) { }
 
-    private handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message })
-        }
-
-        console.log(error) // Agregar Winston o similar
-        return res.status(500).json({ error: 'Servidor fuera de servicio' })
-    }
-
     // productId: string,
     public async execute(req: Request, res: Response): Promise<{ id: string } | undefined> {
 
@@ -28,7 +19,7 @@ export class DeleteProductUseCase {
 
             return await this.productRepository.delete(productId);
         } catch (error) {
-            this.handleError(error, res);
+            throw error
         }
     }
 }

@@ -13,15 +13,6 @@ export class CreateProductUseCase {
 
     constructor(private readonly productRepository: ProductRepositoryInterface) { }
 
-    private handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message })
-        }
-
-        console.log(error) // Agregar Winston o similar
-        return res.status(500).json({ error: 'Servidor fuera de servicio' })
-    }
-
     // product: { name: string, description: string, height?: number, length?: number, width?: number },
     public async execute(req: Request, res: Response): Promise<{ id: string } | undefined> {
 
@@ -32,7 +23,7 @@ export class CreateProductUseCase {
             return { id: newProduct.id };
         } catch (error) {
             console.log(error);
-            this.handleError(error, res);
+            throw error
         }
     }
 }

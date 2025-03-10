@@ -12,39 +12,34 @@ export class CreateAccessTokenAuthCase {
 
     constructor(private readonly authRepository: AuthRepositoryInterface, private readonly accessTokenRepository: AccessTokenRepositoryInterface) { }
 
-    private handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message })
-        }
-
-        console.log(error) // Agregar Winston o similar
-        return res.status(500).json({ error: 'Servidor fuera de servicio' })
-    }
-
     public async execute(userId: string, req: Request, res: Response): Promise<AccessTokenInterfaceDto> {
 
-        // Buscar usuario en la base de datos
-        const user = await this.authRepository.findById(userId);
+        try {
+            // Buscar usuario en la base de datos
+            const user = await this.authRepository.findById(userId);
 
-        // Si el usuario no existe
-        if (!user) {
-            throw CustomError.badRequest('Usuario no encontrado');
+            // Si el usuario no existe
+            if (!user) {
+                throw CustomError.badRequest('Usuario no encontrado');
+            }
+
+            // Generar token
+            const newAccessToken = await this.generateToken(user, req, res);
+
+            if (!newAccessToken) {
+                throw CustomError.internalServerError('Token no generado');
+            }
+
+            this.handleAccessTokens(user.id, newAccessToken, res);
+
+            if (!newAccessToken) {
+                throw CustomError.internalServerError('Token no generado');
+            }
+
+            return { token: newAccessToken };
+        } catch (error) {
+            throw error;
         }
-
-        // Generar token
-        const newAccessToken = await this.generateToken(user, req, res);
-
-        if (!newAccessToken) {
-            throw CustomError.internalServerError('Token no generado');
-        }
-
-        this.handleAccessTokens(user.id, newAccessToken, res);
-
-        if (!newAccessToken) {
-            throw CustomError.internalServerError('Token no generado');
-        }
-
-        return { token: newAccessToken };
     }
 
     private async generateToken(user: any, req: Request, res: Response): Promise<string | undefined> {
@@ -59,7 +54,7 @@ export class CreateAccessTokenAuthCase {
             return response;
 
         } catch (error) {
-            this.handleError(error, res);
+            throw error;
         }
     }
 
@@ -78,7 +73,7 @@ export class CreateAccessTokenAuthCase {
                 // expiresAt
             });
         } catch (error) {
-            this.handleError(error, res);
+            throw error;
         }
     }
 
@@ -87,7 +82,7 @@ export class CreateAccessTokenAuthCase {
             const oldestToken = tokens.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
             await this.accessTokenRepository.delete(oldestToken.id);
         } catch (error) {
-            this.handleError(error, res);
+            throw error;
         }
     }
 }
